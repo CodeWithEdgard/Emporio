@@ -105,7 +105,7 @@ public class ProductController {
             pstmt.setInt(8, product.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Erro ao atualizar o produto no banco de dados: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Erro ao Atualizar", "Erro ao atualizar o produto no banco de dados: " + e.getMessage());
         }
     }
 
@@ -221,10 +221,34 @@ public class ProductController {
         expirationDateField.clear();
         quantityField.clear();
         unitPriceField.clear();
+        totalValueField.clear();
+        soldQuantityField.clear();
     }
 
     @FXML
     private void handleEditProduct(ActionEvent event) {
+        Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
+
+        if (selectedProduct != null) {
+            // Preencher os campos com os dados do produto selecionado
+            nameField.setText(selectedProduct.getName());
+            categoryField.setText(selectedProduct.getCategory());
+            supplierField.setText(selectedProduct.getSupplier());
+            expirationDateField.setText(selectedProduct.getExpirationDate() != null ? selectedProduct.getExpirationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "");
+            quantityField.setText(String.valueOf(selectedProduct.getQuantity()));
+            unitPriceField.setText(String.valueOf(selectedProduct.getUnitPrice()));
+
+            // Bloquear campos não editáveis
+            totalValueField.setText(String.valueOf(selectedProduct.getTotalValue()));
+            totalValueField.setEditable(false);  // O campo de valor total deve ser apenas leitura
+            soldQuantityField.clear();  // Limpar o campo de quantidade vendida, já que não é editável neste contexto
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Nenhum produto selecionado", "Por favor, selecione um produto para editar.");
+        }
+    }
+
+    @FXML
+    private void handleUpdateProduct(ActionEvent event) {
         Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
 
         if (selectedProduct != null) {
@@ -238,7 +262,7 @@ public class ProductController {
                     expirationDate = LocalDate.parse(expirationDateField.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                 }
             } catch (DateTimeParseException e) {
-                System.out.println("Formato de data de vencimento inválido. Use o formato dd/MM/yyyy.");
+                showAlert(Alert.AlertType.ERROR, "Formato de Data Inválido", "Data de vencimento deve estar no formato dd/MM/yyyy.");
                 return;
             }
 
@@ -246,7 +270,7 @@ public class ProductController {
             try {
                 quantity = Integer.parseInt(quantityField.getText());
             } catch (NumberFormatException e) {
-                System.out.println("Quantidade inválida.");
+                showAlert(Alert.AlertType.ERROR, "Quantidade Inválida", "Por favor, insira uma quantidade válida.");
                 return;
             }
 
@@ -254,21 +278,25 @@ public class ProductController {
             try {
                 unitPrice = Double.parseDouble(unitPriceField.getText());
             } catch (NumberFormatException e) {
-                System.out.println("Preço unitário inválido.");
+                showAlert(Alert.AlertType.ERROR, "Preço Inválido", "Por favor, insira um preço válido.");
                 return;
             }
 
             if (expirationDate == null) {
-                System.out.println("Data de vencimento é obrigatória.");
+                showAlert(Alert.AlertType.ERROR, "Data de Vencimento Necessária", "Data de vencimento é obrigatória.");
                 return;
             }
 
+            double totalValue = quantity * unitPrice;  // Calcule o valor total
+
             Product updatedProduct = new Product(selectedProduct.getId(), name, category, supplier, expirationDate, quantity, unitPrice);
-            updateProduct(updatedProduct);
-            loadProducts();
-            clearFields();
+            // Atualize o valor total
+
+            updateProductInDatabase(updatedProduct);  // Atualize no banco de dados
+            loadProducts();  // Recarregue os produtos
+            clearFields();  // Limpe os campos
         } else {
-            showAlert(AlertType.WARNING, "Nenhum produto selecionado", "Por favor, selecione um produto para editar.");
+            showAlert(Alert.AlertType.WARNING, "Nenhum produto selecionado", "Por favor, selecione um produto para editar.");
         }
     }
 
@@ -331,4 +359,7 @@ public class ProductController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+
+
 }

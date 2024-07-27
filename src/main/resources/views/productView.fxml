@@ -43,8 +43,8 @@
         <Label text="Preço Unitário:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
         <TextField fx:id="unitPriceField" promptText="Digite o preço unitário" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
-        <!-- <Label text="Valor Total:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
-        <TextField fx:id="totalValueField" promptText="Valor total calculado automaticamente" GridPane.rowIndex="7" GridPane.columnIndex="1" editable="false"/> -->
+         <Label text="Valor Total:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+        <TextField fx:id="totalValueField" promptText="Valor total calculado automaticamente" GridPane.rowIndex="7" GridPane.columnIndex="1" editable="false"/>
 
         <Label text="Quantidade Vendida:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
         <TextField fx:id="soldQuantityField" promptText="Digite a quantidade vendida" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
@@ -53,6 +53,7 @@
     <HBox spacing="10" alignment="CENTER">
         <Button text="Adicionar Produto" onAction="#handleAddProduct"/>
         <Button text="Editar Produto" onAction="#handleEditProduct"/>
+        <Button text="Atualizar Produto" onAction="#handleUpdateProduct"/>
         <Button text="Excluir Produto" onAction="#handleDeleteProduct"/>
         <Button text="Vender Produto" onAction="#handleSellProduct"/>
     </HBox>

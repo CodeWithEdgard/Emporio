@@ -88,4 +88,6 @@ public class Product {
     private void updateTotalValue() {
         this.totalValue = this.unitPrice * this.quantity;
     }
+
+
 }

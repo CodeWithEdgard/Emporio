@@ -16,10 +16,10 @@ public class Main extends Application {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/views/ProductView.fxml")));
 
         // Define o título da janela
-        primaryStage.setTitle("Cadastro de Produtos: Sabores da Terra");
+        primaryStage.setTitle("Emporio São José");
 
         // Cria a cena com o tamanho desejado
-        Scene scene = new Scene(root, 750, 750); // Define a largura e altura desejadas
+        Scene scene = new Scene(root, 800, 800); // Define a largura e altura desejadas
 
         // Define a cena para o stage
         primaryStage.setScene(scene);
