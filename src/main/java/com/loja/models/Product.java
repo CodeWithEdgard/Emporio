@@ -8,16 +8,14 @@ public class Product {
     private String category;
     private String supplier;
     private LocalDate expirationDate;
-    private LocalDate purchaseDate;
     private int quantity;
 
-    public Product(int id, String name, String category, String supplier, LocalDate expirationDate, LocalDate purchaseDate, int quantity) {
+    public Product(int id, String name, String category, String supplier, LocalDate expirationDate, int quantity) {
         this.id = id;
         this.name = name;
         this.category = category;
         this.supplier = supplier;
         this.expirationDate = expirationDate;
-        this.purchaseDate = purchaseDate;
         this.quantity = quantity;
     }
 
@@ -59,14 +57,6 @@ public class Product {
 
     public void setExpirationDate(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
-    }
-
-    public LocalDate getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public void setPurchaseDate(LocalDate purchaseDate) {
-        this.purchaseDate = purchaseDate;
     }
 
     public int getQuantity() {

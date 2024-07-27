@@ -59,7 +59,6 @@ public class ProductController {
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
         supplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplier"));
         expirationDateColumn.setCellValueFactory(new PropertyValueFactory<>("expirationDate"));
-        purchaseDateColumn.setCellValueFactory(new PropertyValueFactory<>("purchaseDate"));
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
 
     }
@@ -87,10 +86,10 @@ public class ProductController {
                 String category = rs.getString("category");
                 String supplier = rs.getString("supplier");
                 LocalDate expirationDate = rs.getDate("expiration_date") != null ? rs.getDate("expiration_date").toLocalDate() : null;
-                LocalDate purchaseDate = rs.getDate("purchase_date") != null ? rs.getDate("purchase_date").toLocalDate() : null;
+
                 int quantity = rs.getInt("quantity");
 
-                products.add(new Product(id, name, category, supplier, expirationDate, purchaseDate, quantity));
+                products.add(new Product(id, name, category, supplier, expirationDate, quantity));
             }
         } catch (SQLException e) {
             System.out.println("Erro ao listar produtos: " + e.getMessage());
@@ -138,7 +137,7 @@ public class ProductController {
             return;
         }
 
-        Product product = new Product(0, name, category, supplier, expirationDate, purchaseDate, quantity);
+        Product product = new Product(0, name, category, supplier, expirationDate, quantity);
         addProduct(product);
 
         loadProducts();
@@ -155,7 +154,6 @@ public class ProductController {
             pstmt.setString(2, product.getCategory());
             pstmt.setString(3, product.getSupplier());
             pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
-            pstmt.setDate(5, product.getPurchaseDate() != null ? Date.valueOf(product.getPurchaseDate()) : null);
             pstmt.setInt(6, product.getQuantity());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -215,7 +213,7 @@ public class ProductController {
                 return;
             }
 
-            Product updatedProduct = new Product(selectedProduct.getId(), name, category, supplier, expirationDate, purchaseDate, quantity);
+            Product updatedProduct = new Product(selectedProduct.getId(), name, category, supplier, expirationDate, quantity);
             updateProduct(updatedProduct);
             loadProducts();
             clearFields();
@@ -253,7 +251,6 @@ public class ProductController {
             pstmt.setString(2, product.getCategory());
             pstmt.setString(3, product.getSupplier());
             pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
-            pstmt.setDate(5, product.getPurchaseDate() != null ? Date.valueOf(product.getPurchaseDate()) : null);
             pstmt.setInt(6, product.getQuantity());
             pstmt.setInt(7, product.getId());
             pstmt.executeUpdate();
