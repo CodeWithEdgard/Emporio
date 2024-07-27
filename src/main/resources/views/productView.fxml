@@ -9,7 +9,6 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox fx:controller="com.loja.controllers.ProductController" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" spacing="10">
@@ -35,17 +34,27 @@
         <Label text="Data de Vencimento:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
         <TextField fx:id="expirationDateField" promptText="Digite a data de vencimento (dd/MM/yyyy)" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-        <Label text="Data de Compra:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-        <TextField fx:id="purchaseDateField" promptText="Digite a data de compra (dd/MM/yyyy)" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <!-- <Label text="Data de Compra:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="purchaseDateField" promptText="Digite a data de compra (dd/MM/yyyy)" GridPane.rowIndex="4" GridPane.columnIndex="1"/> -->
 
         <Label text="Quantidade:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
         <TextField fx:id="quantityField" promptText="Digite a quantidade do produto" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+        <Label text="Preço Unitário:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <TextField fx:id="unitPriceField" promptText="Digite o preço unitário" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+        <!-- <Label text="Valor Total:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+        <TextField fx:id="totalValueField" promptText="Valor total calculado automaticamente" GridPane.rowIndex="7" GridPane.columnIndex="1" editable="false"/> -->
+
+        <Label text="Quantidade Vendida:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+        <TextField fx:id="soldQuantityField" promptText="Digite a quantidade vendida" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
     </GridPane>
 
     <HBox spacing="10" alignment="CENTER">
         <Button text="Adicionar Produto" onAction="#handleAddProduct"/>
         <Button text="Editar Produto" onAction="#handleEditProduct"/>
         <Button text="Excluir Produto" onAction="#handleDeleteProduct"/>
+        <Button text="Vender Produto" onAction="#handleSellProduct"/>
     </HBox>
 
     <TableView fx:id="productTableView" VBox.vgrow="ALWAYS">
@@ -55,10 +64,13 @@
             <TableColumn fx:id="categoryColumn" text="Categoria"/>
             <TableColumn fx:id="supplierColumn" text="Fornecedor"/>
             <TableColumn fx:id="expirationDateColumn" text="Data de Vencimento"/>
-            <TableColumn fx:id="purchaseDateColumn" text="Data de Compra"/>
             <TableColumn fx:id="quantityColumn" text="Quantidade"/>
+            <TableColumn fx:id="unitPriceColumn" text="Preço Unitário"/>
+            <TableColumn fx:id="totalValueColumn" text="Valor Total"/>
         </columns>
     </TableView>
+
+
 
     <HBox spacing="10" alignment="CENTER">
         <Button text="Carregar Produtos" onAction="#handleLoadProducts"/>

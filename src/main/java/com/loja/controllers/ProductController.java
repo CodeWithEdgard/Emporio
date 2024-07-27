@@ -8,7 +8,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -19,9 +18,6 @@ import java.util.List;
 
 public class ProductController {
 
-    private static final DateTimeFormatter EXPIRATION_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter PURCHASE_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
     @FXML
     private TextField nameField;
     @FXML
@@ -31,9 +27,13 @@ public class ProductController {
     @FXML
     private TextField expirationDateField;
     @FXML
-    private TextField purchaseDateField;
-    @FXML
     private TextField quantityField;
+    @FXML
+    private TextField unitPriceField;
+    @FXML
+    private TextField totalValueField;
+    @FXML
+    private TextField soldQuantityField;
 
     @FXML
     private TableView<Product> productTableView;
@@ -46,21 +46,75 @@ public class ProductController {
     @FXML
     private TableColumn<Product, String> supplierColumn;
     @FXML
-    private TableColumn<Product, LocalDate> expirationDateColumn;
-    @FXML
-    private TableColumn<Product, LocalDate> purchaseDateColumn;
+    private TableColumn<Product, String> expirationDateColumn;
     @FXML
     private TableColumn<Product, Integer> quantityColumn;
+    @FXML
+    private TableColumn<Product, Double> unitPriceColumn;
+    @FXML
+    private TableColumn<Product, Double> totalValueColumn;
 
     @FXML
     private void initialize() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
-        supplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplier"));
-        expirationDateColumn.setCellValueFactory(new PropertyValueFactory<>("expirationDate"));
-        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        idColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        nameColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getName()));
+        categoryColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getCategory()));
+        supplierColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getSupplier()));
+        expirationDateColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getExpirationDate().toString()));
+        quantityColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getQuantity()).asObject());
+        unitPriceColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getUnitPrice()).asObject());
+        totalValueColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getTotalValue()).asObject());
+    }
 
+    @FXML
+    private void handleSellProduct() {
+        Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
+        if (selectedProduct != null) {
+            try {
+                int soldQuantity = Integer.parseInt(soldQuantityField.getText());
+                int currentQuantity = selectedProduct.getQuantity();
+
+                if (soldQuantity > 0 && soldQuantity <= currentQuantity) {
+                    selectedProduct.setQuantity(currentQuantity - soldQuantity);
+                    productTableView.refresh();
+                    updateProductInDatabase(selectedProduct);
+                } else {
+                    showAlert("Quantidade Inválida", "A quantidade vendida deve ser maior que 0 e menor ou igual ao estoque atual.");
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Entrada Inválida", "Por favor, insira um número válido para a quantidade vendida.");
+            }
+        } else {
+            showAlert("Nenhum Produto Selecionado", "Por favor, selecione um produto na tabela.");
+        }
+    }
+
+    private void updateProductInDatabase(Product product) {
+        String sql = "UPDATE products SET name = ?, category = ?, supplier = ?, expiration_date = ?, quantity = ?, unit_price = ?, total_value = ? WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, product.getName());
+            pstmt.setString(2, product.getCategory());
+            pstmt.setString(3, product.getSupplier());
+            pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
+            pstmt.setInt(5, product.getQuantity());
+            pstmt.setDouble(6, product.getUnitPrice());
+            pstmt.setDouble(7, product.getTotalValue());
+            pstmt.setInt(8, product.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erro ao atualizar o produto no banco de dados: " + e.getMessage());
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML
@@ -86,10 +140,10 @@ public class ProductController {
                 String category = rs.getString("category");
                 String supplier = rs.getString("supplier");
                 LocalDate expirationDate = rs.getDate("expiration_date") != null ? rs.getDate("expiration_date").toLocalDate() : null;
-
                 int quantity = rs.getInt("quantity");
+                double unitPrice = rs.getDouble("unit_price");
 
-                products.add(new Product(id, name, category, supplier, expirationDate, quantity));
+                products.add(new Product(id, name, category, supplier, expirationDate, quantity, unitPrice));
             }
         } catch (SQLException e) {
             System.out.println("Erro ao listar produtos: " + e.getMessage());
@@ -102,25 +156,14 @@ public class ProductController {
         String name = nameField.getText();
         String category = categoryField.getText();
         String supplier = supplierField.getText();
-
         LocalDate expirationDate = null;
-        LocalDate purchaseDate = null;
 
         try {
             if (!expirationDateField.getText().isEmpty()) {
-                expirationDate = LocalDate.parse(expirationDateField.getText(), EXPIRATION_DATE_FORMATTER);
+                expirationDate = LocalDate.parse(expirationDateField.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             }
         } catch (DateTimeParseException e) {
             System.out.println("Formato de data de vencimento inválido. Use o formato dd/MM/yyyy.");
-            return;
-        }
-
-        try {
-            if (!purchaseDateField.getText().isEmpty()) {
-                purchaseDate = LocalDate.parse(purchaseDateField.getText(), PURCHASE_DATE_FORMATTER);
-            }
-        } catch (DateTimeParseException e) {
-            System.out.println("Formato de data de compra inválido. Use o formato dd/MM/yyyy.");
             return;
         }
 
@@ -132,12 +175,20 @@ public class ProductController {
             return;
         }
 
+        double unitPrice = 0;
+        try {
+            unitPrice = Double.parseDouble(unitPriceField.getText());
+        } catch (NumberFormatException e) {
+            System.out.println("Preço unitário inválido.");
+            return;
+        }
+
         if (expirationDate == null) {
             System.out.println("Data de vencimento é obrigatória.");
             return;
         }
 
-        Product product = new Product(0, name, category, supplier, expirationDate, quantity);
+        Product product = new Product(0, name, category, supplier, expirationDate, quantity, unitPrice);
         addProduct(product);
 
         loadProducts();
@@ -145,7 +196,7 @@ public class ProductController {
     }
 
     private void addProduct(Product product) {
-        String sql = "INSERT INTO products (name, category, supplier, expiration_date, purchase_date, quantity) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO products (name, category, supplier, expiration_date, quantity, unit_price, total_value) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -154,7 +205,9 @@ public class ProductController {
             pstmt.setString(2, product.getCategory());
             pstmt.setString(3, product.getSupplier());
             pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
-            pstmt.setInt(6, product.getQuantity());
+            pstmt.setInt(5, product.getQuantity());
+            pstmt.setDouble(6, product.getUnitPrice());
+            pstmt.setDouble(7, product.getTotalValue());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Erro ao adicionar o produto: " + e.getMessage());
@@ -166,8 +219,8 @@ public class ProductController {
         categoryField.clear();
         supplierField.clear();
         expirationDateField.clear();
-        purchaseDateField.clear();
         quantityField.clear();
+        unitPriceField.clear();
     }
 
     @FXML
@@ -178,25 +231,14 @@ public class ProductController {
             String name = nameField.getText();
             String category = categoryField.getText();
             String supplier = supplierField.getText();
-
             LocalDate expirationDate = null;
-            LocalDate purchaseDate = null;
 
             try {
                 if (!expirationDateField.getText().isEmpty()) {
-                    expirationDate = LocalDate.parse(expirationDateField.getText(), EXPIRATION_DATE_FORMATTER);
+                    expirationDate = LocalDate.parse(expirationDateField.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                 }
             } catch (DateTimeParseException e) {
                 System.out.println("Formato de data de vencimento inválido. Use o formato dd/MM/yyyy.");
-                return;
-            }
-
-            try {
-                if (!purchaseDateField.getText().isEmpty()) {
-                    purchaseDate = LocalDate.parse(purchaseDateField.getText(), PURCHASE_DATE_FORMATTER);
-                }
-            } catch (DateTimeParseException e) {
-                System.out.println("Formato de data de compra inválido. Use o formato dd/MM/yyyy.");
                 return;
             }
 
@@ -208,12 +250,20 @@ public class ProductController {
                 return;
             }
 
+            double unitPrice = 0;
+            try {
+                unitPrice = Double.parseDouble(unitPriceField.getText());
+            } catch (NumberFormatException e) {
+                System.out.println("Preço unitário inválido.");
+                return;
+            }
+
             if (expirationDate == null) {
                 System.out.println("Data de vencimento é obrigatória.");
                 return;
             }
 
-            Product updatedProduct = new Product(selectedProduct.getId(), name, category, supplier, expirationDate, quantity);
+            Product updatedProduct = new Product(selectedProduct.getId(), name, category, supplier, expirationDate, quantity, unitPrice);
             updateProduct(updatedProduct);
             loadProducts();
             clearFields();
@@ -242,7 +292,7 @@ public class ProductController {
     }
 
     private void updateProduct(Product product) {
-        String sql = "UPDATE products SET name = ?, category = ?, supplier = ?, expiration_date = ?, purchase_date = ?, quantity = ? WHERE id = ?";
+        String sql = "UPDATE products SET name = ?, category = ?, supplier = ?, expiration_date = ?, quantity = ?, unit_price = ?, total_value = ? WHERE id = ?";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -251,8 +301,10 @@ public class ProductController {
             pstmt.setString(2, product.getCategory());
             pstmt.setString(3, product.getSupplier());
             pstmt.setDate(4, Date.valueOf(product.getExpirationDate()));
-            pstmt.setInt(6, product.getQuantity());
-            pstmt.setInt(7, product.getId());
+            pstmt.setInt(5, product.getQuantity());
+            pstmt.setDouble(6, product.getUnitPrice());
+            pstmt.setDouble(7, product.getTotalValue());
+            pstmt.setInt(8, product.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Erro ao atualizar o produto: " + e.getMessage());

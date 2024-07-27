@@ -8,7 +8,7 @@ public class Database {
 
     private static final String URL = "jdbc:postgresql://localhost:5432/db_projeto";
     private static final String USER = "postgres"; // Substitua pelo seu usuário
-    private static final String PASSWORD = "KxjV4.Y_1"; // Substitua pela sua senha
+    private static final String PASSWORD = "springstudent";  //"springstudent" //"KxjV4.Y_1"
 
     static {
         try {
