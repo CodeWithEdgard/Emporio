@@ -10,7 +10,7 @@ module com.loja.emporio {
     // Abre os pacotes necessários para o JavaFX
     opens com.loja to javafx.fxml;
     opens com.loja.controllers to javafx.fxml;
-    opens com.loja.models to javafx.base; // Adicione isso para permitir o acesso ao modelo
+    opens com.loja.models to javafx.base;
 
     // Exporta os pacotes conforme necessário
     exports com.loja;

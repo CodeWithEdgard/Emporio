@@ -7,8 +7,8 @@ import java.sql.SQLException;
 public class Database {
 
     private static final String URL = "jdbc:postgresql://localhost:5432/db_projeto";
-    private static final String USER = "postgres"; // Substitua pelo seu usuário
-    private static final String PASSWORD = "springstudent";  //"springstudent" //"KxjV4.Y_1"
+    private static final String USER = "postgres"; // Nome do Usuario do Banco
+    private static final String PASSWORD = "KxjV4.Y_1";  //"springstudent" //"KxjV4.Y_1"
 
     static {
         try {

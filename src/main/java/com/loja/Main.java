@@ -15,20 +15,20 @@ public class Main extends Application {
         // Carrega o arquivo FXML
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/views/ProductView.fxml")));
 
-        // Define o título da janela
+        // título da janela
         primaryStage.setTitle("Emporio São José");
 
-        // Cria a cena com o tamanho desejado
-        Scene scene = new Scene(root, 800, 800); // Define a largura e altura desejadas
+        // tamanho desejado da janela
+        Scene scene = new Scene(root, 800, 800); // largura e altura desejadas
 
-        // Define a cena para o stage
+        // cena para o stage
         primaryStage.setScene(scene);
 
-        // Define o tamanho mínimo da janela (opcional)
+        // tamanho mínimo da janela
         primaryStage.setMinWidth(400);
         primaryStage.setMinHeight(300);
 
-        // Mostra a janela
+        // Exibe a Janela
         primaryStage.show();
     }
 

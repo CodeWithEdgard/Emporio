@@ -34,7 +34,6 @@ public class ProductController {
     private TextField totalValueField;
     @FXML
     private TextField soldQuantityField;
-
     @FXML
     private TableView<Product> productTableView;
     @FXML
@@ -240,8 +239,8 @@ public class ProductController {
 
             // Bloquear campos não editáveis
             totalValueField.setText(String.valueOf(selectedProduct.getTotalValue()));
-            totalValueField.setEditable(false);  // O campo de valor total deve ser apenas leitura
-            soldQuantityField.clear();  // Limpar o campo de quantidade vendida, já que não é editável neste contexto
+            totalValueField.setEditable(false);
+            soldQuantityField.clear();
         } else {
             showAlert(Alert.AlertType.WARNING, "Nenhum produto selecionado", "Por favor, selecione um produto para editar.");
         }
@@ -287,13 +286,13 @@ public class ProductController {
                 return;
             }
 
-            double totalValue = quantity * unitPrice;  // Calcule o valor total
+            double totalValue = quantity * unitPrice;  // Calculo Valor Total
 
             Product updatedProduct = new Product(selectedProduct.getId(), name, category, supplier, expirationDate, quantity, unitPrice);
-            // Atualize o valor total
 
-            updateProductInDatabase(updatedProduct);  // Atualize no banco de dados
-            loadProducts();  // Recarregue os produtos
+
+            updateProductInDatabase(updatedProduct);  // Atualização do banco de dados
+            loadProducts();  // Recarregue produtos
             clearFields();  // Limpe os campos
         } else {
             showAlert(Alert.AlertType.WARNING, "Nenhum produto selecionado", "Por favor, selecione um produto para editar.");

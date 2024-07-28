@@ -34,9 +34,6 @@
         <Label text="Data de Vencimento:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
         <TextField fx:id="expirationDateField" promptText="Digite a data de vencimento (dd/MM/yyyy)" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-        <!-- <Label text="Data de Compra:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-        <TextField fx:id="purchaseDateField" promptText="Digite a data de compra (dd/MM/yyyy)" GridPane.rowIndex="4" GridPane.columnIndex="1"/> -->
-
         <Label text="Quantidade:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
         <TextField fx:id="quantityField" promptText="Digite a quantidade do produto" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
