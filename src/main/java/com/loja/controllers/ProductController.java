@@ -54,6 +54,11 @@ public class ProductController {
     private TableColumn<Product, Double> totalValueColumn;
 
     @FXML
+    private TextField searchField;
+    @FXML
+    private Button searchButton;
+
+    @FXML
     private void initialize() {
         idColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getId()).asObject());
         nameColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getName()));
@@ -63,6 +68,54 @@ public class ProductController {
         quantityColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getQuantity()).asObject());
         unitPriceColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getUnitPrice()).asObject());
         totalValueColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getTotalValue()).asObject());
+    }
+
+    @FXML
+    private void handleSearchProducts (ActionEvent event) {
+        String searchTerm = searchField.getText();
+        if (searchTerm == null || searchTerm.isEmpty()) {
+            showAlert("Produto Inválido ou Não Cadastrado", "Por favor, Insira um Produto Válido e Cadastrado.");
+            return;
+        }
+        productTableView.setItems(searchProducts(searchTerm));
+    }
+
+    private ObservableList<Product> searchProducts(String searchTerm) {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT * FROM products WHERE name ILIKE ? OR category ILIKE ? OR supplier ILIKE ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            String searchPattern = "%" + searchTerm + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            pstmt.setString(3, searchPattern);
+
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String category = rs.getString("category");
+                String supplier = rs.getString("supplier");
+                LocalDate expirationDate = rs.getDate("expiration_date") != null ? rs.getDate("expiration_date").toLocalDate() : null;
+                int quantity = rs.getInt("quantity");
+                double unitPrice = rs.getDouble("unit_price");
+
+                products.add(new Product(id, name, category, supplier, expirationDate, quantity, unitPrice));
+            }
+        } catch (SQLException e) {
+            showAlert("Erro ao Buscar Produtos", "Erro ao buscar produtos no banco de dados: " + e.getMessage());
+        }
+        return FXCollections.observableArrayList(products);
+    }
+
+    private void showAlert(AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML
@@ -104,7 +157,8 @@ public class ProductController {
             pstmt.setInt(8, product.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erro ao Atualizar", "Erro ao atualizar o produto no banco de dados: " + e.getMessage());
+            showAlert("Erro ao Atualizar", "Erro ao atualizar o produto no banco de dados: " + e.getMessage());
+
         }
     }
 
@@ -242,7 +296,7 @@ public class ProductController {
             totalValueField.setEditable(false);
             soldQuantityField.clear();
         } else {
-            showAlert(Alert.AlertType.WARNING, "Nenhum produto selecionado", "Por favor, selecione um produto para editar.");
+            showAlert("Nenhum produto selecionado", "Por favor, selecione um produto para editar.");
         }
     }
 
@@ -261,7 +315,7 @@ public class ProductController {
                     expirationDate = LocalDate.parse(expirationDateField.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                 }
             } catch (DateTimeParseException e) {
-                showAlert(Alert.AlertType.ERROR, "Formato de Data Inválido", "Data de vencimento deve estar no formato dd/MM/yyyy.");
+                showAlert("Formato de Data Inválido", "Data de vencimento deve estar no formato dd/MM/yyyy.");
                 return;
             }
 
@@ -269,7 +323,7 @@ public class ProductController {
             try {
                 quantity = Integer.parseInt(quantityField.getText());
             } catch (NumberFormatException e) {
-                showAlert(Alert.AlertType.ERROR, "Quantidade Inválida", "Por favor, insira uma quantidade válida.");
+                showAlert("Quantidade Inválida", "Por favor, insira uma quantidade válida.");
                 return;
             }
 
@@ -277,12 +331,12 @@ public class ProductController {
             try {
                 unitPrice = Double.parseDouble(unitPriceField.getText());
             } catch (NumberFormatException e) {
-                showAlert(Alert.AlertType.ERROR, "Preço Inválido", "Por favor, insira um preço válido.");
+                showAlert("Preço Inválido", "Por favor, insira um preço válido.");
                 return;
             }
 
             if (expirationDate == null) {
-                showAlert(Alert.AlertType.ERROR, "Data de Vencimento Necessária", "Data de vencimento é obrigatória.");
+                showAlert("Data de Vencimento Necessária", "Data de vencimento é obrigatória.");
                 return;
             }
 
@@ -295,7 +349,7 @@ public class ProductController {
             loadProducts();  // Recarregue produtos
             clearFields();  // Limpe os campos
         } else {
-            showAlert(Alert.AlertType.WARNING, "Nenhum produto selecionado", "Por favor, selecione um produto para editar.");
+            showAlert("Nenhum produto selecionado", "Por favor, selecione um produto para editar.");
         }
     }
 
@@ -314,7 +368,7 @@ public class ProductController {
                 }
             });
         } else {
-            showAlert(AlertType.WARNING, "Nenhum produto selecionado", "Por favor, selecione um produto para excluir.");
+            showAlert("Nenhum produto selecionado", "Por favor, selecione um produto para excluir.");
         }
     }
 
@@ -350,15 +404,6 @@ public class ProductController {
             System.out.println("Erro ao excluir o produto: " + e.getMessage());
         }
     }
-
-    private void showAlert(AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
 
 
 }
