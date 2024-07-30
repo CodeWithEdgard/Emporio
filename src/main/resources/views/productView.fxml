@@ -53,7 +53,7 @@
         <Button text="Atualizar Produto" onAction="#handleUpdateProduct"/>
         <Button text="Excluir Produto" onAction="#handleDeleteProduct"/>
         <Button text="Vender Produto" onAction="#handleSellProduct"/>
-        <Button text="Buscar Produtos" onAction="#handleSearchProducts"/>
+
     </HBox>
     <HBox spacing="10" alignment="CENTER">
         <Label text="Buscar:"/>
